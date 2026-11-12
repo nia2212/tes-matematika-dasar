@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathTest Pro - Latihan Kraepelin/Pauli & Matematika Perusahaan</title>
+    <!-- Tailwind CSS untuk styling modern dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono untuk angka yang presisi -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Tone.js untuk efek suara interaktif tanpa file eksternal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styles untuk animasi dan tata letak khusus game */
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none; /* Mencegah seleksi teks tidak sengaja saat mengetik cepat */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .number-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Animasi getar saat jawaban salah */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.25s ease-in-out;
+        }
+
+        /* Animasi pop saat jawaban benar */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-pop {
+            animation: pop 0.2s ease-out;
+        }
+
+        /* Custom scrollbar untuk tabel riwayat */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Efek tombol numpad taktil */
+        .numpad-btn {
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+        }
+        .numpad-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- ==================== HEADER / NAVBAR ==================== -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-white">MathTest <span class="text-indigo-400">Pro</span></h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Simulasi Psikotes & Seleksi Kerja</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Toggle Suara -->
+                <button id="btn-sound" onclick="toggleSound()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700" title="Suara Efek">
+                    <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                    </svg>
+                    <svg id="icon-sound-off" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+                    </svg>
+                </button>
+                <!-- Tombol Kembali ke Menu -->
+                <button id="btn-home" onclick="confirmExit()" class="hidden px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-medium border border-rose-500/20 transition">
+                    Keluar Tes
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+
+            <!-- 1. LAYAR MENU UTAMA (HOME) -->
+            <section id="screen-menu" class="space-y-6 animate-fade-in">
+                <div class="text-center space-y-2 max-w-2xl mx-auto">
+                    <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold tracking-wider uppercase border border-indigo-500/20">
+                        Persiapan Karir & Psikotes
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        Uji Kecepatan & Ketelitian Hitung Anda
+                    </h2>
+                    <p class="text-slate-400 text-sm sm:text-base">
+                        Pilih mode latihan di bawah ini untuk melatih konsentrasi layaknya tes koran (Kraepelin/Pauli) atau tes numerik seleksi masuk perusahaan.
+                    </p>
+                </div>
+
+                <!-- Pilihan Mode Game -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                    <!-- Kartu Mode 1: Kraepelin / Pauli -->
+                    <div class="bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 shadow-xl hover:shadow-indigo-500/10 group">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Tes Koran</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Tes Kraepelin / Pauli</h3>
+                                <p class="text-sm text-slate-400 mt-1 leading-relaxed">
+                                    Jumlahkan dua angka yang berdekatan secara terus-menerus. Jika hasil ≥ 10, cukup ketik <strong class="text-indigo-400">angka satuannya</strong> saja (contoh: 8 + 7 = 15 → ketik <strong class="text-white">5</strong>).
+                                </p>
+                            </div>
+                            <!-- Pengaturan Durasi Kraepelin -->
+                            <div class="pt-2">
+                                <label class="text-xs font-medium text-slate-400 block mb-2">Pilih Durasi Latihan:</label>
+                                <div class="grid grid-cols-3 gap-2" id="kraepelin-duration-selector">
+                                    <button type="button" onclick="selectDuration(60, this)" class="dur-btn active py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white border border-indigo-500">1 Menit</button>
+                                    <button type="button" onclick="selectDuration(180, this)" class="dur-btn py-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">3 Menit</button>
+                                    <button type="button" onclick="selectDuration(300, this)" class="dur-btn py-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">5 Menit</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="startKraepelin()" class="mt-6 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold shadow-lg shadow-indigo-600/25 transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+                            <span>Mulai Tes Kraepelin</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Mode 2: Matematika Dasar Masuk Perusahaan -->
+                    <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 shadow-xl hover:shadow-emerald-500/10 group">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300">Tes Numerik</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Matematika Masuk Perusahaan</h3>
+                                <p class="text-sm text-slate-400 mt-1 leading-relaxed">
+                                    Simulasi soal seleksi kerja (TIU / Psikotes Numerik): Deret angka, aritmatika dasar, persentase, perbandingan, dan soal cerita logika bisnis.
+                                </p>
+                            </div>
+                            <!-- Info Paket Soal -->
+                            <div class="bg-slate-800/60 rounded-xl p-3 border border-slate-700/50 space-y-1.5">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">Jumlah Soal:</span>
+                                    <span class="text-white font-semibold">15 Soal Acak</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">Batas Waktu:</span>
+                                    <span class="text-emerald-400 font-semibold">10 Menit (40 dtk/soal)</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">Materi:</span>
+                                    <span class="text-slate-200">Deret, Persen, Aritmatika, Logika</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="startCompanyMath()" class="mt-6 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold shadow-lg shadow-emerald-600/25 transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+                            <span>Mulai Tes Perusahaan</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tips Singkat -->
+                <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-4 flex items-start gap-3 text-xs sm:text-sm text-slate-400">
+                    <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>
+                        <strong class="text-slate-200">Tips Pro:</strong> Gunakan <strong class="text-slate-200">Keyboard Angka (0-9)</strong> di PC/Laptop untuk kecepatan maksimal pada Tes Kraepelin, atau gunakan tombol layar sentuh jika menggunakan Smartphone.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 2. LAYAR GAME KRAEPELIN / PAULI -->
+            <section id="screen-kraepelin" class="hidden space-y-4">
+                <!-- Top Bar Status -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                            <span class="text-xs text-slate-400 block">Sisa Waktu</span>
+                            <span id="kr-timer" class="text-xl font-bold number-font text-indigo-400">01:00</span>
+                        </div>
+                        <div class="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700">
+                            <span class="text-xs text-slate-400 block">Interval (15 dtk)</span>
+                            <span id="kr-interval" class="text-xl font-bold number-font text-amber-400">Kolom 1</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Dijawab</span>
+                            <span id="kr-score" class="text-xl font-bold number-font text-emerald-400">0</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Salah</span>
+                            <span id="kr-errors" class="text-xl font-bold number-font text-rose-400">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Area Utama Kraepelin (Visualisasi Kolom Angka Vertikal ala Kertas Koran) -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <!-- Kolom Pita Angka Vertikal -->
+                    <div class="md:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[320px] shadow-inner">
+                        <div class="absolute top-3 left-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Pita Angka (Dari Bawah ke Atas)
+                        </div>
+
+                        <!-- Container Angka -->
+                        <div id="kr-tape-container" class="flex flex-col items-center justify-center space-y-2 w-full max-w-[220px] my-4">
+                            <!-- Angka Selanjutnya (Preview Atas) -->
+                            <div class="w-16 h-12 rounded-xl bg-slate-800/40 border border-slate-800 flex items-center justify-center text-2xl font-bold number-font text-slate-500">
+                                <span id="kr-num-next2">4</span>
+                            </div>
+
+                            <!-- Angka Atas Soal Aktif -->
+                            <div id="kr-box-top" class="w-20 h-16 rounded-2xl bg-slate-800 border-2 border-indigo-500/60 flex items-center justify-center text-4xl font-extrabold number-font text-white shadow-lg">
+                                <span id="kr-num-top">7</span>
+                            </div>
+
+                            <!-- Indikator Penjumlahan & Kotak Input Jawaban -->
+                            <div class="flex items-center gap-3 w-full justify-center py-1">
+                                <span class="text-indigo-400 font-bold text-xl">+</span>
+                                <div id="kr-answer-box" class="w-16 h-12 rounded-xl bg-indigo-600/20 border-2 border-indigo-500 flex items-center justify-center text-2xl font-bold number-font text-indigo-300 animate-pulse">
+                                    ?
+                                </div>
+                                <span class="text-xs text-slate-400 w-16 leading-tight">Ketik satuan</span>
+                            </div>
+
+                            <!-- Angka Bawah Soal Aktif -->
+                            <div id="kr-box-bottom" class="w-20 h-16 rounded-2xl bg-slate-800 border-2 border-indigo-500/60 flex items-center justify-center text-4xl font-extrabold number-font text-white shadow-lg">
+                                <span id="kr-num-bottom">8</span>
+                            </div>
+
+                            <!-- Riwayat Jawaban Sebelumnya (Bawah) -->
+                            <div class="w-16 h-10 rounded-xl bg-slate-800/30 flex items-center justify-center text-sm font-medium number-font text-slate-500 gap-2">
+                                <span id="kr-prev-info">Prev: -</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Numpad Interaktif (Untuk Mobile & Klik Mouse) -->
+                    <div class="md:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <div class="text-center mb-3">
+                            <p class="text-xs text-slate-400">Ketuk angka di bawah atau tekan tombol <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">0-9</kbd> di keyboard</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+                            <button onclick="handleKraepelinInput(1)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">1</button>
+                            <button onclick="handleKraepelinInput(2)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">2</button>
+                            <button onclick="handleKraepelinInput(3)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">3</button>
+                            <button onclick="handleKraepelinInput(4)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">4</button>
+                            <button onclick="handleKraepelinInput(5)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">5</button>
+                            <button onclick="handleKraepelinInput(6)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">6</button>
+                            <button onclick="handleKraepelinInput(7)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">7</button>
+                            <button onclick="handleKraepelinInput(8)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">8</button>
+                            <button onclick="handleKraepelinInput(9)" class="numpad-btn py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">9</button>
+                            <div class="col-span-3">
+                                <button onclick="handleKraepelinInput(0)" class="numpad-btn w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-2xl font-bold number-font border border-slate-700">0</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. LAYAR MATEMATIKA MASUK PERUSAHAAN -->
+            <section id="screen-company" class="hidden space-y-5">
+                <!-- Header Progress & Timer -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span id="comp-category" class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+                                Deret Angka
+                            </span>
+                            <span class="text-sm text-slate-400 font-medium">
+                                Soal <strong id="comp-q-num" class="text-white">1</strong> dari <span id="comp-q-total">15</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span id="comp-timer" class="font-bold number-font text-amber-400">10:00</span>
+                        </div>
+                    </div>
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="comp-progress" class="bg-emerald-500 h-full transition-all duration-300" style="width: 6.6%"></div>
+                    </div>
+                </div>
+
+                <!-- Kartu Soal -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+                    <div class="space-y-2">
+                        <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Pertanyaan:</p>
+                        <h3 id="comp-question-text" class="text-lg sm:text-2xl font-bold text-white leading-relaxed">
+                            Memuat soal...
+                        </h3>
+                    </div>
+
+                    <!-- Pilihan Jawaban -->
+                    <div id="comp-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <!-- Diisi secara dinamis oleh JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. LAYAR HASIL & ANALISIS PERFORMA -->
+            <section id="screen-result" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+                    <div class="text-center space-y-2 border-b border-slate-800 pb-6">
+                        <span id="res-badge" class="inline-block px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
+                            Hasil Evaluasi Tes
+                        </span>
+                        <h2 id="res-title" class="text-2xl sm:text-3xl font-extrabold text-white">Selesai!</h2>
+                        <p id="res-subtitle" class="text-sm text-slate-400">Berikut adalah analisis kecepatan dan ketelitian Anda.</p>
+                    </div>
+
+                    <!-- Grid Statistik Utama -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <span id="stat-1-label" class="text-xs text-slate-400 block">Total Benar</span>
+                            <span id="stat-1-val" class="text-2xl sm:text-3xl font-extrabold number-font text-emerald-400 mt-1 block">0</span>
+                        </div>
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <span id="stat-2-label" class="text-xs text-slate-400 block">Kesalahan</span>
+                            <span id="stat-2-val" class="text-2xl sm:text-3xl font-extrabold number-font text-rose-400 mt-1 block">0</span>
+                        </div>
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <span id="stat-3-label" class="text-xs text-slate-400 block">Akurasi</span>
+                            <span id="stat-3-val" class="text-2xl sm:text-3xl font-extrabold number-font text-indigo-400 mt-1 block">0%</span>
+                        </div>
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
+                            <span id="stat-4-label" class="text-xs text-slate-400 block">Kecepatan</span>
+                            <span id="stat-4-val" class="text-2xl sm:text-3xl font-extrabold number-font text-amber-400 mt-1 block">0/mnt</span>
+                        </div>
+                    </div>
+
+                    <!-- Grafik Kerja Kraepelin (Hanya muncul di mode Kraepelin) -->
+                    <div id="kr-chart-section" class="hidden space-y-3 bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-bold text-white">Grafik Konsistensi Kerja (Per 15 Detik)</h4>
+                            <span id="kr-consistency-tag" class="text-xs font-semibold px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Stabil</span>
+                        </div>
+                        <p class="text-xs text-slate-400">Dalam psikotes HRD, grafik yang stabil atau menanjak menunjukkan ketahanan kerja (endurance) yang baik.</p>
+                        <!-- Bar Chart Container -->
+                        <div id="kr-bar-chart" class="h-40 flex items-end gap-2 pt-6 pb-2 px-2 border-b border-slate-800">
+                            <!-- Batang grafik di-render via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Pembahasan Soal Perusahaan (Hanya muncul di mode Perusahaan) -->
+                    <div id="comp-review-section" class="hidden space-y-3">
+                        <h4 class="text-sm font-bold text-white">Review Jawaban & Pembahasan Singkat:</h4>
+                        <div id="comp-review-list" class="max-h-64 overflow-y-auto space-y-2.5 pr-1">
+                            <!-- Item review di-render via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button id="btn-retry" onclick="retryCurrentMode()" class="flex-1 py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/20">
+                            Ulangi Latihan Ini
+                        </button>
+                        <button onclick="goHome()" class="flex-1 py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold border border-slate-700 transition">
+                            Pilih Mode Lain
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ==================== MODAL KONFIRMASI KELUAR (Pengganti confirm()) ==================== -->
+    <div id="modal-exit" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-lg font-bold text-white">Hentikan Sesi Tes?</h3>
+            <p class="text-sm text-slate-400">Progres latihan saat ini tidak akan disimpan jika Anda keluar sekarang.</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeExitModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition">Lanjut Tes</button>
+                <button onclick="goHome()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-sm transition">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-900">
+        MathTest Pro &bull; Simulasi Psikotes Kraepelin/Pauli & Numerik Perusahaan
+    </footer>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        /**
+         * STATE MANAGEMENT APLIKASI
+         */
+        const AppState = {
+            currentMode: null, // 'kraepelin' | 'company'
+            soundEnabled: true,
+            timerInterval: null,
+
+            // State khusus Kraepelin / Pauli
+            kr: {
+                duration: 60, // default 60 detik
+                timeLeft: 60,
+                tape: [], // Array angka acak 1-9
+                currentIndex: 0,
+                correctCount: 0,
+                errorCount: 0,
+                intervalData: [], // Menyimpan jumlah benar tiap 15 detik
+                currentIntervalScore: 0,
+                elapsedSeconds: 0
+            },
+
+            // State khusus Matematika Perusahaan
+            comp: {
+                questions: [],
+                currentIdx: 0,
+                timeLeft: 600, // 10 menit
+                userAnswers: [],
+                startTime: 0
+            }
+        };
+
+        /**
+         * SISTEM AUDIO (Menggunakan Tone.js agar tidak butuh file eksternal)
+         */
+        let synth = null;
+        function initAudio() {
+            if (!synth && typeof Tone !== 'undefined') {
+                synth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+                }).toDestination();
+                synth.volume.value = -10;
+            }
+        }
+
+        function playSound(type) {
+            if (!AppState.soundEnabled) return;
+            try {
+                initAudio();
+                if (Tone.context.state !== 'running') Tone.start();
+                if (type === 'correct') {
+                    synth.triggerAttackRelease('C6', '32n');
+                } else if (type === 'wrong') {
+                    synth.triggerAttackRelease('F3', '16n');
+                } else if (type === 'finish') {
+                    synth.triggerAttackRelease('G5', '8n');
+                }
+            } catch (e) {
+                // Abaikan jika browser memblokir autoplay audio sebelum interaksi
+            }
+        }
+
+        function toggleSound() {
+            AppState.soundEnabled = !AppState.soundEnabled;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', !AppState.soundEnabled);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', AppState.soundEnabled);
+        }
+
+        /**
+         * NAVIGASI LAYAR
+         */
+        function showScreen(screenId) {
+            const screens = ['screen-menu', 'screen-kraepelin', 'screen-company', 'screen-result'];
+            screens.forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+
+            // Tampilkan tombol keluar hanya saat sedang tes
+            const btnHome = document.getElementById('btn-home');
+            if (screenId === 'screen-kraepelin' || screenId === 'screen-company') {
+                btnHome.classList.remove('hidden');
+            } else {
+                btnHome.classList.add('hidden');
+            }
+        }
+
+        function confirmExit() {
+            document.getElementById('modal-exit').classList.remove('hidden');
+            document.getElementById('modal-exit').classList.add('flex');
+        }
+
+        function closeExitModal() {
+            document.getElementById('modal-exit').classList.add('hidden');
+            document.getElementById('modal-exit').classList.remove('flex');
+        }
+
+        function goHome() {
+            clearInterval(AppState.timerInterval);
+            closeExitModal();
+            AppState.currentMode = null;
+            showScreen('screen-menu');
+        }
+
+        function retryCurrentMode() {
+            if (AppState.currentMode === 'kraepelin') {
+                startKraepelin();
+            } else if (AppState.currentMode === 'company') {
+                startCompanyMath();
+            }
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        /**
+         * ============================================================================
+         * LOGIKA MODE 1: TES KRAEPELIN / PAULI
+         * ============================================================================
+         */
+        function selectDuration(seconds, btnElement) {
+            AppState.kr.duration = seconds;
+            document.querySelectorAll('.dur-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+            });
+            btnElement.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+            btnElement.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+        }
+
+        function generateKraepelinNumbers(count) {
+            const arr = [];
+            for (let i = 0; i < count; i++) {
+                // Angka standar Kraepelin adalah 1 sampai 9 (menghindari 0 beruntun agar menantang)
+                arr.push(Math.floor(Math.random() * 9) + 1);
+            }
+            return arr;
+        }
+
+        function startKraepelin() {
+            AppState.currentMode = 'kraepelin';
+            clearInterval(AppState.timerInterval);
+
+            // Reset state Kraepelin
+            AppState.kr.timeLeft = AppState.kr.duration;
+            AppState.kr.tape = generateKraepelinNumbers(1000); // Siapkan 1000 angka acak
+            AppState.kr.currentIndex = 0;
+            AppState.kr.correctCount = 0;
+            AppState.kr.errorCount = 0;
+            AppState.kr.intervalData = [];
+            AppState.kr.currentIntervalScore = 0;
+            AppState.kr.elapsedSeconds = 0;
+
+            // Update UI awal
+            document.getElementById('kr-timer').textContent = formatTime(AppState.kr.timeLeft);
+            document.getElementById('kr-score').textContent = '0';
+            document.getElementById('kr-errors').textContent = '0';
+            document.getElementById('kr-interval').textContent = 'Kolom 1';
+            document.getElementById('kr-prev-info').textContent = 'Mulai!';
+
+            renderKraepelinTape();
+            showScreen('screen-kraepelin');
+
+            // Jalankan Timer
+            AppState.timerInterval = setInterval(() => {
+                AppState.kr.timeLeft--;
+                AppState.kr.elapsedSeconds++;
+
+                document.getElementById('kr-timer').textContent = formatTime(AppState.kr.timeLeft);
+
+                // Setiap 15 detik catat performa kolom (simulasi ketukan "Pindah!" pada tes Pauli/Kraepelin)
+                if (AppState.kr.elapsedSeconds % 15 === 0) {
+                    AppState.kr.intervalData.push(AppState.kr.currentIntervalScore);
+                    AppState.kr.currentIntervalScore = 0;
+                    const colNum = AppState.kr.intervalData.length + 1;
+                    document.getElementById('kr-interval').textContent = `Kolom ${colNum}`;
+                }
+
+                if (AppState.kr.timeLeft <= 0) {
+                    finishKraepelin();
+                }
+            }, 1000);
+        }
+
+        function renderKraepelinTape() {
+            const idx = AppState.kr.currentIndex;
+            // Tambah angka baru jika hampir habis
+            if (idx + 5 >= AppState.kr.tape.length) {
+                AppState.kr.tape.push(...generateKraepelinNumbers(200));
+            }
+
+            const bottomNum = AppState.kr.tape[idx];
+            const topNum = AppState.kr.tape[idx + 1];
+            const next2Num = AppState.kr.tape[idx + 2];
+
+            document.getElementById('kr-num-bottom').textContent = bottomNum;
+            document.getElementById('kr-num-top').textContent = topNum;
+            document.getElementById('kr-num-next2').textContent = next2Num;
+        }
+
+        function handleKraepelinInput(digit) {
+            if (AppState.currentMode !== 'kraepelin' || AppState.kr.timeLeft <= 0) return;
+
+            const idx = AppState.kr.currentIndex;
+            const num1 = AppState.kr.tape[idx];
+            const num2 = AppState.kr.tape[idx + 1];
+            const expectedDigit = (num1 + num2) % 10;
+
+            const answerBox = document.getElementById('kr-answer-box');
+            const tapeContainer = document.getElementById('kr-tape-container');
+
+            if (digit === expectedDigit) {
+                // Jawaban Benar
+                playSound('correct');
+                AppState.kr.correctCount++;
+                AppState.kr.currentIntervalScore++;
+                document.getElementById('kr-score').textContent = AppState.kr.correctCount;
+                document.getElementById('kr-prev-info').textContent = `${num1}+${num2}=${(num1+num2)}`;
+
+                // Geser pita ke atas
+                AppState.kr.currentIndex++;
+                renderKraepelinTape();
+
+                // Animasi visual halus
+                answerBox.classList.remove('border-rose-500', 'text-rose-400');
+                answerBox.classList.add('border-emerald-500', 'text-emerald-400');
+                answerBox.textContent = digit;
+                setTimeout(() => {
+                    answerBox.classList.remove('border-emerald-500', 'text-emerald-400');
+                    answerBox.textContent = '?';
+                }, 120);
+
+            } else {
+                // Jawaban Salah
+                playSound('wrong');
+                AppState.kr.errorCount++;
+                document.getElementById('kr-errors').textContent = AppState.kr.errorCount;
+
+                // Efek getar merah
+                tapeContainer.classList.remove('animate-shake');
+                void tapeContainer.offsetWidth; // trigger reflow
+                tapeContainer.classList.add('animate-shake');
+
+                answerBox.classList.add('border-rose-500', 'text-rose-400');
+                answerBox.textContent = digit;
+                setTimeout(() => {
+                    answerBox.classList.remove('border-rose-500', 'text-rose-400');
+                    answerBox.textContent = '?';
+                }, 250);
+            }
+        }
+
+        function finishKraepelin() {
+            clearInterval(AppState.timerInterval);
+            playSound('finish');
+
+            // Simpan sisa interval terakhir jika ada
+            if (AppState.kr.currentIntervalScore > 0 || AppState.kr.intervalData.length === 0) {
+                AppState.kr.intervalData.push(AppState.kr.currentIntervalScore);
+            }
+
+            const totalAttempts = AppState.kr.correctCount + AppState.kr.errorCount;
+            const accuracy = totalAttempts > 0 ? Math.round((AppState.kr.correctCount / totalAttempts) * 100) : 0;
+            const durationMinutes = AppState.kr.duration / 60;
+            const speedPerMin = Math.round(AppState.kr.correctCount / durationMinutes);
+
+            // Isi layar hasil
+            document.getElementById('res-badge').textContent = 'Hasil Tes Kraepelin / Pauli';
+            document.getElementById('res-title').textContent = speedPerMin >= 45 ? 'Kecepatan Luar Biasa!' : (speedPerMin >= 25 ? 'Performa Bagus!' : 'Terus Berlatih!');
+            document.getElementById('res-subtitle').textContent = `Anda menyelesaikan ${AppState.kr.correctCount} penjumlahan dalam ${durationMinutes} menit.`;
+
+            document.getElementById('stat-1-label').textContent = 'Total Benar';
+            document.getElementById('stat-1-val').textContent = AppState.kr.correctCount;
+
+            document.getElementById('stat-2-label').textContent = 'Kesalahan';
+            document.getElementById('stat-2-val').textContent = AppState.kr.errorCount;
+
+            document.getElementById('stat-3-label').textContent = 'Akurasi';
+            document.getElementById('stat-3-val').textContent = `${accuracy}%`;
+
+            document.getElementById('stat-4-label').textContent = 'Kecepatan';
+            document.getElementById('stat-4-val').textContent = `${speedPerMin}/mnt`;
+
+            // Tampilkan grafik batang Kraepelin
+            document.getElementById('comp-review-section').classList.add('hidden');
+            document.getElementById('kr-chart-section').classList.remove('hidden');
+            renderKraepelinChart();
+
+            showScreen('screen-result');
+        }
+
+        function renderKraepelinChart() {
+            const chartContainer = document.getElementById('kr-bar-chart');
+            chartContainer.innerHTML = '';
+            const data = AppState.kr.intervalData;
+            const maxVal = Math.max(...data, 10);
+
+            data.forEach((val, index) => {
+                const heightPercent = Math.max((val / maxVal) * 100, 8);
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'flex-1 flex flex-col items-center justify-end h-full gap-1';
+
+                barWrapper.innerHTML = `
+                    <span class="text-[11px] font-bold number-font text-indigo-300">${val}</span>
+                    <div class="w-full max-w-[36px] bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-md transition-all duration-500" style="height: ${heightPercent}%"></div>
+                    <span class="text-[10px] text-slate-500">K${index + 1}</span>
+                `;
+                chartContainer.appendChild(barWrapper);
+            });
+
+            // Analisis stabilitas sederhana
+            if (data.length >= 2) {
+                const firstHalf = data.slice(0, Math.floor(data.length / 2)).reduce((a, b) => a + b, 0);
+                const secondHalf = data.slice(Math.floor(data.length / 2)).reduce((a, b) => a + b, 0);
+                const tag = document.getElementById('kr-consistency-tag');
+                if (secondHalf >= firstHalf) {
+                    tag.textContent = 'Grafik Menanjak / Stabil (Sangat Baik)';
+                    tag.className = 'text-xs font-semibold px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300';
+                } else {
+                    tag.textContent = 'Cenderung Menurun (Jaga Fokus)';
+                    tag.className = 'text-xs font-semibold px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300';
+                }
+            }
+        }
+
+        /**
+         * ============================================================================
+         * LOGIKA MODE 2: MATEMATIKA DASAR MASUK PERUSAHAAN (GENERATOR SOAL DINAMIS)
+         * ============================================================================
+         */
+        function generateCompanyQuestions(total = 15) {
+            const questions = [];
+
+            for (let i = 0; i < total; i++) {
+                const type = i % 5; // Variasi 5 kategori soal psikotes perusahaan
+                let qObj = {};
+
+                if (type === 0) {
+                    // 1. Deret Angka (Aritmatika / Bertingkat)
+                    const start = Math.floor(Math.random() * 15) + 2;
+                    const step = Math.floor(Math.random() * 6) + 3;
+                    const seq = [start, start + step, start + step * 2, start + step * 3, start + step * 4];
+                    const ans = start + step * 5;
+                    qObj = {
+                        category: 'Deret Angka',
+                        question: `Lanjutkan pola deret angka berikut: ${seq.join(', ')}, ...`,
+                        answer: ans,
+                        options: generateNumericOptions(ans),
+                        explanation: `Pola deret bertambah secara konstan +${step} pada setiap suku berikutnya.`
+                    };
+                } else if (type === 1) {
+                    // 2. Persentase & Diskon Bisnis
+                    const percents = [10, 15, 20, 25, 30, 40, 50];
+                    const p = percents[Math.floor(Math.random() * percents.length)];
+                    const base = (Math.floor(Math.random() * 18) + 2) * 50000; // kelipatan 50.000
+                    const ans = (p / 100) * base;
+                    qObj = {
+                        category: 'Aritmatika Bisnis',
+                        question: `Sebuah produk seharga Rp ${base.toLocaleString('id-ID')} mendapat potongan diskon ${p}%. Berapa besar nilai diskonnya?`,
+                        answer: ans,
+                        options: generateCurrencyOptions(ans),
+                        explanation: `${p}% × Rp ${base.toLocaleString('id-ID')} = Rp ${ans.toLocaleString('id-ID')}.`,
+                        isCurrency: true
+                    };
+                } else if (type === 2) {
+                    // 3. Operasi Hitung Campuran Cepat
+                    const a = Math.floor(Math.random() * 20) + 12;
+                    const b = Math.floor(Math.random() * 8) + 3;
+                    const c = Math.floor(Math.random() * 25) + 10;
+                    const ans = (a * b) - c;
+                    qObj = {
+                        category: 'Hitungan Cepat',
+                        question: `Hasil dari (${a} × ${b}) - ${c} adalah ...`,
+                        answer: ans,
+                        options: generateNumericOptions(ans),
+                        explanation: `Kerjakan perkalian terlebih dahulu: (${a} × ${b}) = ${a * b}, kemudian ${a * b} - ${c} = ${ans}.`
+                    };
+                } else if (type === 3) {
+                    // 4. Perbandingan & Produktivitas Kerja
+                    const workers1 = [4, 5, 6, 8][Math.floor(Math.random() * 4)];
+                    const days = [6, 8, 9, 10, 12][Math.floor(Math.random() * 5)];
+                    const totalManDays = workers1 * days;
+                    // Cari pembagi yang pas untuk workers2
+                    const possibleW2 = [2, 3, 4, 5, 6, 8, 10, 12].filter(w => w !== workers1 && totalManDays % w === 0);
+                    const workers2 = possibleW2[0] || workers1 * 2;
+                    const ans = totalManDays / workers2;
+
+                    qObj = {
+                        category: 'Perbandingan Berbalik Nilai',
+                        question: `Sebuah proyek dapat diselesaikan oleh ${workers1} karyawan dalam waktu ${days} hari. Jika proyek ingin diselesaikan oleh ${workers2} karyawan, berapa hari waktu yang dibutuhkan?`,
+                        answer: ans,
+                        options: generateNumericOptions(ans, ' hari'),
+                        explanation: `Total beban kerja = ${workers1} × ${days} = ${totalManDays} hari-orang. Dibagi ${workers2} karyawan = ${ans} hari.`,
+                        suffix: ' hari'
+                    };
+                } else {
+                    // 5. Kecepatan, Jarak, dan Waktu
+                    const speed = [40, 50, 60, 75, 80][Math.floor(Math.random() * 5)];
+                    const hours = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                    const distance = speed * hours;
+                    qObj = {
+                        category: 'Logika & Pengukuran',
+                        question: `Seorang kurir logistik menempuh jarak ${distance} km dengan kecepatan rata-rata ${speed} km/jam. Berapa jam waktu perjalanan kurir tersebut?`,
+                        answer: hours,
+                        options: generateNumericOptions(hours, ' jam'),
+                        explanation: `Waktu = Jarak / Kecepatan = ${distance} km / ${speed} km/jam = ${hours} jam.`,
+                        suffix: ' jam'
+                    };
+                }
+
+                questions.push(qObj);
+            }
+
+            return questions;
+        }
+
+        function generateNumericOptions(correct, suffix = '') {
+            const set = new Set([correct]);
+            while (set.size < 4) {
+                const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                const candidate = correct + offset;
+                if (candidate > 0) set.add(candidate);
+            }
+            return Array.from(set)
+                .sort(() => Math.random() - 0.5)
+                .map(val => ({ raw: val, label: `${val}${suffix}` }));
+        }
+
+        function generateCurrencyOptions(correct) {
+            const set = new Set([correct]);
+            const step = 25000;
+            while (set.size < 4) {
+                const offset = (Math.floor(Math.random() * 4) + 1) * step * (Math.random() < 0.5 ? 1 : -1);
+                const candidate = correct + offset;
+                if (candidate > 0) set.add(candidate);
+            }
+            return Array.from(set)
+                .sort(() => Math.random() - 0.5)
+                .map(val => ({ raw: val, label: `Rp ${val.toLocaleString('id-ID')}` }));
+        }
+
+        function startCompanyMath() {
+            AppState.currentMode = 'company';
+            clearInterval(AppState.timerInterval);
+
+            AppState.comp.questions = generateCompanyQuestions(15);
+            AppState.comp.currentIdx = 0;
+            AppState.comp.timeLeft = 600; // 10 menit
+            AppState.comp.userAnswers = [];
+            AppState.comp.startTime = Date.now();
+
+            document.getElementById('comp-q-total').textContent = AppState.comp.questions.length;
+            document.getElementById('comp-timer').textContent = formatTime(AppState.comp.timeLeft);
+
+            renderCompanyQuestion();
+            showScreen('screen-company');
+
+            AppState.timerInterval = setInterval(() => {
+                AppState.comp.timeLeft--;
+                document.getElementById('comp-timer').textContent = formatTime(AppState.comp.timeLeft);
+                if (AppState.comp.timeLeft <= 0) {
+                    finishCompanyMath();
+                }
+            }, 1000);
+        }
+
+        function renderCompanyQuestion() {
+            const idx = AppState.comp.currentIdx;
+            const total = AppState.comp.questions.length;
+            const q = AppState.comp.questions[idx];
+
+            document.getElementById('comp-category').textContent = q.category;
+            document.getElementById('comp-q-num').textContent = idx + 1;
+            document.getElementById('comp-progress').style.width = `${((idx + 1) / total) * 100}%`;
+            document.getElementById('comp-question-text').textContent = q.question;
+
+            const optionsContainer = document.getElementById('comp-options');
+            optionsContainer.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl bg-slate-800/80 hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500 transition flex items-center gap-3.5 group';
+                btn.onclick = () => selectCompanyOption(opt);
+
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg bg-slate-700 group-hover:bg-indigo-600 text-slate-200 group-hover:text-white font-bold flex items-center justify-center text-sm transition">
+                        ${letters[i]}
+                    </span>
+                    <span class="text-base sm:text-lg font-semibold text-slate-100 number-font">${opt.label}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectCompanyOption(selectedOpt) {
+            const idx = AppState.comp.currentIdx;
+            const q = AppState.comp.questions[idx];
+            const isCorrect = selectedOpt.raw === q.answer;
+
+            playSound(isCorrect ? 'correct' : 'wrong');
+
+            AppState.comp.userAnswers.push({
+                question: q.question,
+                userLabel: selectedOpt.label,
+                correctLabel: q.options.find(o => o.raw === q.answer).label,
+                isCorrect: isCorrect,
+                explanation: q.explanation
+            });
+
+            if (idx + 1 < AppState.comp.questions.length) {
+                AppState.comp.currentIdx++;
+                renderCompanyQuestion();
+            } else {
+                finishCompanyMath();
+            }
+        }
+
+        function finishCompanyMath() {
+            clearInterval(AppState.timerInterval);
+            playSound('finish');
+
+            const total = AppState.comp.questions.length;
+            const correct = AppState.comp.userAnswers.filter(a => a.isCorrect).length;
+            const wrong = total - correct;
+            const scorePercent = Math.round((correct / total) * 100);
+            const elapsedSec = Math.max(1, Math.round((Date.now() - AppState.comp.startTime) / 1000));
+            const avgSecPerQ = Math.round(elapsedSec / Math.max(1, AppState.comp.userAnswers.length));
+
+            document.getElementById('res-badge').textContent = 'Hasil Tes Matematika Perusahaan';
+            document.getElementById('res-title').textContent = scorePercent >= 80 ? 'Lolos Passing Grade!' : (scorePercent >= 60 ? 'Cukup Baik!' : 'Perlu Latihan Lagi');
+            document.getElementById('res-subtitle').textContent = `Anda menjawab benar ${correct} dari ${total} soal seleksi numerik.`;
+
+            document.getElementById('stat-1-label').textContent = 'Jawaban Benar';
+            document.getElementById('stat-1-val').textContent = `${correct}/${total}`;
+
+            document.getElementById('stat-2-label').textContent = 'Jawaban Salah';
+            document.getElementById('stat-2-val').textContent = wrong;
+
+            document.getElementById('stat-3-label').textContent = 'Skor Akhir';
+            document.getElementById('stat-3-val').textContent = `${scorePercent}`;
+
+            document.getElementById('stat-4-label').textContent = 'Rata-rata Waktu';
+            document.getElementById('stat-4-val').textContent = `${avgSecPerQ} dtk`;
+
+            // Tampilkan pembahasan soal
+            document.getElementById('kr-chart-section').classList.add('hidden');
+            document.getElementById('comp-review-section').classList.remove('hidden');
+
+            const reviewList = document.getElementById('comp-review-list');
+            reviewList.innerHTML = '';
+
+            AppState.comp.userAnswers.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = `p-3.5 rounded-xl border text-xs sm:text-sm space-y-1.5 ${
+                    item.isCorrect
+                        ? 'bg-emerald-950/20 border-emerald-800/50'
+                        : 'bg-rose-950/20 border-rose-800/50'
+                }`;
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="font-semibold text-slate-200">${idx + 1}. ${item.question}</span>
+                        <span class="px-2 py-0.5 rounded text-[11px] font-bold shrink-0 ${
+                            item.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                        }">
+                            ${item.isCorrect ? 'Benar' : 'Salah'}
+                        </span>
+                    </div>
+                    <div class="text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>Jawaban Anda: <strong class="${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${item.userLabel}</strong></span>
+                        ${!item.isCorrect ? `<span>Kunci Jawaban: <strong class="text-emerald-400">${item.correctLabel}</strong></span>` : ''}
+                    </div>
+                    <p class="text-slate-400 italic text-xs pt-1 border-t border-slate-800/60">💡 ${item.explanation}</p>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            showScreen('screen-result');
+        }
+
+        /**
+         * EVENT LISTENER KEYBOARD (Untuk input cepat angka 0-9 di mode Kraepelin)
+         */
+        document.addEventListener('keydown', (e) => {
+            if (AppState.currentMode === 'kraepelin') {
+                if (e.key >= '0' && e.key <= '9') {
+                    e.preventDefault();
+                    handleKraepelinInput(parseInt(e.key, 10));
+                }
+            }
+        });
+    </script>
+</body>
+</html>
